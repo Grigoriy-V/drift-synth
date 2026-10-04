@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Drift — процедурный синт</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div class="brand">
+        <h1>Drift</h1>
+        <p>процедурная фоновая музыка</p>
+      </div>
+      <div class="transport">
+        <button id="play" class="primary" title="Пробел">▶ Играть</button>
+        <button id="rec" title="Записать в файл">● Запись</button>
+      </div>
+    </header>
+
+    <canvas id="viz"></canvas>
+
+    <div id="status" class="status"></div>
+
+    <section class="now">
+      <div id="chords" class="chords"></div>
+      <div id="grid" class="grid"></div>
+    </section>
+
+    <section class="card">
+      <h2>Тема</h2>
+      <div id="presets" class="chips"></div>
+      <h2 class="sub">Настроение</h2>
+      <div id="moods" class="chips"></div>
+      <div class="seed">
+        <label for="seed">Сид</label>
+        <input id="seed" type="text" spellcheck="false" autocomplete="off">
+        <button id="dice" title="Случайный сид">🎲 Новый</button>
+        <label class="check"><input id="stream" type="checkbox"> Бесконечный стрим</label>
+      </div>
+    </section>
+
+    <div class="cols">
+      <section class="card">
+        <h2>Звук</h2>
+        <div id="selects" class="selects"></div>
+        <div id="sliders"></div>
+      </section>
+      <section class="card">
+        <h2>Слои</h2>
+        <div id="layers"></div>
+      </section>
+    </div>
+
+    <footer>«Бесконечный стрим» ведёт трек по секциям и главам: слои входят и уходят, меняются тональность, лад, темп и паттерны. Без него играет одна петля.</footer>
+  </main>
+
+  <script src="engine.js"></script>
+  <script src="ui.js"></script>
+</body>
+</html>

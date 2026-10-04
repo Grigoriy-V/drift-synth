@@ -1,0 +1,177 @@
+:root {
+  --bg: #0b0d14;
+  --card: #141824;
+  --line: #232838;
+  --text: #e6e9f2;
+  --muted: #8189a0;
+  --accent: #6ee7d2;
+  --accent2: #9b8cff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: radial-gradient(1200px 600px at 70% -10%, #1a1f3a 0%, var(--bg) 60%) fixed, var(--bg);
+  color: var(--text);
+  font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+main {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: 0.04em;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.brand p { margin: 0; color: var(--muted); }
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+button, select, input[type="text"] {
+  font: inherit;
+  color: var(--text);
+  background: #1b2030;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+button { cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+button:hover { border-color: #3a4260; }
+button.active { border-color: var(--accent); color: var(--accent); }
+
+.transport { display: flex; gap: 8px; }
+
+.primary {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: #0b0d14;
+  border: 0;
+  font-weight: 700;
+  min-width: 120px;
+}
+
+#rec.active { color: #ff6b81; border-color: #ff6b81; }
+
+#viz {
+  display: block;
+  width: 100%;
+  height: 140px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.status { min-height: 20px; margin-top: 10px; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+.now {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.chords { display: flex; gap: 6px; }
+
+.chord {
+  min-width: 56px;
+  padding: 8px 10px;
+  text-align: center;
+  font-weight: 600;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+}
+
+.chord.on { color: #0b0d14; background: var(--accent); border-color: var(--accent); }
+
+.grid {
+  flex: 1;
+  min-width: 280px;
+  display: grid;
+  grid-template-columns: 44px repeat(16, 1fr);
+  gap: 3px;
+  align-items: center;
+}
+
+.grid span { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+
+.cell { height: 9px; border-radius: 2px; background: #1b2030; }
+.cell.beat { background: #222840; }
+.cell.hit { background: var(--accent2); }
+.cell.head { outline: 1px solid var(--accent); }
+.cell.hit.head { background: var(--accent); }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 700px) { .cols { grid-template-columns: 1fr; } }
+
+h2.sub { margin-top: 16px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.seed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  color: var(--muted);
+}
+
+.seed input[type="text"] { flex: 1; min-width: 120px; }
+.check { display: flex; align-items: center; gap: 6px; color: var(--text); cursor: pointer; }
+
+.selects { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.selects label { display: flex; flex-direction: column; gap: 4px; color: var(--muted); font-size: 12px; }
+
+.row {
+  display: grid;
+  grid-template-columns: 104px 1fr 64px;
+  gap: 10px;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.row output { text-align: right; white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
+.row button { padding: 5px 8px; text-align: left; }
+.row.off input { opacity: 0.35; }
+
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+input[type="checkbox"] { accent-color: var(--accent); }
+
+footer { color: var(--muted); font-size: 12px; margin-top: 4px; }

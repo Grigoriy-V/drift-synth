@@ -187,7 +187,7 @@
     const oc = new OfflineAudioContext(2, SR * seconds, SR);
     S.init(oc);
     S.gate.gain.value = 1;
-    e.forceMain = !opts.intro;
+    e.startFull = !opts.intro;
 
     const notes = [];
     const chords = [];
@@ -210,18 +210,18 @@
     hook('arpNote', (t, midi) => notes.push({ layer: 'arp', t, midi, dur: 0.3 }));
     hook('bell', (t, midi) => inLead || notes.push({ layer: 'bells', t, midi, dur: 0.8 }));
     const lead = S.lead.bind(S);
-    S.lead = (t, midi, dur, vel) => {
+    S.lead = (t, midi, dur, vel, inst) => {
       notes.push({ layer: 'lead', t, midi, dur });
       inLead = true;
-      lead(t, midi, dur, vel);
+      lead(t, midi, dur, vel, inst);
       inLead = false;
     };
 
     const sections = [];
     let sec = null;
-    for (let i = 0, t = 0.05; t < seconds; i++, t += 60 / p.bpm / C.beat()) {
+    for (let t = 0.05; t < seconds; t += e.stepDur(), e.advance()) {
       now = t;
-      e.scheduleStep(i, now);
+      e.scheduleStep(now);
       if (e.sec !== sec) {
         sec = e.sec;
         sections.push(now.toFixed(0) + 's ' + sec.type);

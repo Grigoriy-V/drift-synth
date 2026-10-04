@@ -689,8 +689,7 @@
       else this.pluck(t, midi, vel, pan);
     }
 
-    lead(t, midi, dur, vel) {
-      const inst = this.p.leadInst;
+    lead(t, midi, dur, vel, inst = this.p.leadInst) {
       const bus = this.bus.lead;
       if (inst === 'flute') this.flute(t, midi, dur, vel);
       else if (inst === 'harp') this.harp(t, midi, vel * 0.87, bus, 0.1);
@@ -1070,6 +1069,64 @@
     }
 
     // ---------- запись ----------
+
+    // Шейкер (в народном наборе — бубен с бубенцами): короткий шумовой штрих с мягкой атакой
+    shaker(t, vel) {
+      const ctx = this.ctx;
+      const folk = this.p.kit === 'folk';
+      const hp = ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = folk ? 5200 : 6500;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(vel * 0.07, t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.001, t + (folk ? 0.09 : 0.05));
+      this.noiseSrc(t, 0.12, folk ? this.metal : this.noise).connect(hp).connect(g).connect(this.pan(this.bus.drums, -0.35));
+    }
+
+    // Том: pitch 1–3, от низкого к высокому
+    tom(t, pitch, vel) {
+      const ctx = this.ctx;
+      const f = [0, 85, 120, 165][pitch] * (this.p.kit === 'folk' ? 0.85 : 1);
+      const o = ctx.createOscillator();
+      o.frequency.setValueAtTime(f * 1.5, t);
+      o.frequency.exponentialRampToValueAtTime(f, t + 0.06);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(vel * 0.5, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+      o.connect(g).connect(this.pan(this.bus.drums, (pitch - 2) * 0.3));
+      o.start(t);
+      this.track(o, t + 0.3);
+    }
+
+    // Тарелка-акцент в начале секции
+    crash(t, vel) {
+      const ctx = this.ctx;
+      const hp = ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = 4500;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(vel * 0.16, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 1.6);
+      const src = this.noiseSrc(t, 1.7, this.metal);
+      src.loop = true; // буфер короче звона тарелки
+      src.connect(hp).connect(g).connect(this.pan(this.bus.drums, -0.2));
+    }
+
+    // Нарастающий шум перед основной секцией
+    riser(t, dur) {
+      const ctx = this.ctx;
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.Q.value = 1.2;
+      bp.frequency.setValueAtTime(500, t);
+      bp.frequency.exponentialRampToValueAtTime(7000, t + dur);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.11, t + dur);
+      g.gain.linearRampToValueAtTime(0, t + dur + 0.03);
+      this.noiseSrc(t, dur + 0.05).connect(bp).connect(g).connect(this.bus.drums);
+    }
 
     startRecording() {
       this.init();

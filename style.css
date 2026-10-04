@@ -97,7 +97,7 @@ button.active { border-color: var(--accent); color: var(--accent); }
   margin: 12px 0;
 }
 
-.chords { display: flex; gap: 6px; }
+.chords { display: flex; flex-wrap: wrap; gap: 6px; max-width: 280px; }
 
 .chord {
   min-width: 56px;
@@ -175,3 +175,13 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 input[type="checkbox"] { accent-color: var(--accent); }
 
 footer { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+/* закреплённые вручную параметры */
+.locked > span, label.locked, .row.locked output { color: var(--accent); }
+#reset { color: var(--accent); border-color: var(--accent); }
+#reset:disabled { color: var(--muted); border-color: var(--line); cursor: default; }
+
+.timeline { display: flex; align-items: center; gap: 10px; margin-top: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.timeline input { flex: 1; }
+.timeline span { min-width: 44px; }
+#dur { text-align: right; }

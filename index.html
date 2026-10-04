@@ -14,12 +14,19 @@
         <p>процедурная фоновая музыка</p>
       </div>
       <div class="transport">
+        <button id="rewind" title="В начало">⏮</button>
         <button id="play" class="primary" title="Пробел">▶ Играть</button>
         <button id="rec" title="Записать в файл">● Запись</button>
       </div>
     </header>
 
     <canvas id="viz"></canvas>
+
+    <div class="timeline">
+      <span id="pos">0:00</span>
+      <input id="seekbar" type="range" min="0" max="1800" step="1" value="0" title="Перемотка">
+      <span id="dur">30:00</span>
+    </div>
 
     <div id="status" class="status"></div>
 
@@ -38,6 +45,7 @@
         <input id="seed" type="text" spellcheck="false" autocomplete="off">
         <button id="dice" title="Случайный сид">🎲 Новый</button>
         <label class="check"><input id="stream" type="checkbox"> Бесконечный стрим</label>
+        <button id="reset" title="Вернуть значения, которые даёт сид"></button>
       </div>
     </section>
 
@@ -53,10 +61,14 @@
       </section>
     </div>
 
-    <footer>«Бесконечный стрим» ведёт трек по секциям и главам: слои входят и уходят, меняются тональность, лад, темп и паттерны. Без него играет одна петля.</footer>
+    <footer>Сид, тема и настроение полностью определяют трек. Ручная правка любого параметра закрепляется (подсвечена) и действует на все следующие треки, пока не нажать «Сбросить правки». «Бесконечный стрим» ведёт трек по секциям и главам; без него играет одна петля.</footer>
   </main>
 
-  <script src="engine.js"></script>
-  <script src="ui.js"></script>
+  <script src="src/theory.js"></script>
+  <script src="src/genres.js"></script>
+  <script src="src/synth.js"></script>
+  <script src="src/compose.js"></script>
+  <script src="src/engine.js"></script>
+  <script src="src/ui.js"></script>
 </body>
 </html>

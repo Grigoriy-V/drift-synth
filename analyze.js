@@ -1,11 +1,11 @@
 // Отладочный анализатор: рендерит движок офлайн (быстрее реального времени) и считает метрики
 // по сигналу и по сыгранным нотам. В приложение не подключён; в консоли страницы:
 //   const s = document.createElement('script'); s.src = 'analyze.js'; document.head.append(s);
-//   await driftAnalyze(drift.p, { seconds: 30 })
+//   await driftAnalyze(drift.settings, { seconds: 30 })
 (function () {
   'use strict';
 
-  const { Engine, SCALES } = window.Synth;
+  const { Engine, SCALES } = window.Drift;
   const SR = 44100;
   const db = (x) => (x > 0 ? +(20 * Math.log10(x)).toFixed(1) : -Infinity);
 
@@ -173,16 +173,20 @@
     };
   }
 
-  // opts: seconds, only: [слои] — оставить включёнными только эти (из включённых в params),
-  // intro: true — начать со вступления, а не с полной секции
-  async function driftAnalyze(params, opts = {}) {
+  // settings — как drift.settings. opts: seconds; only: [слои] — оставить только эти (из включённых в треке);
+  // set: {параметр: значение} — закрепить параметры трека; intro: true — начать со вступления
+  async function driftAnalyze(settings, opts = {}) {
     const seconds = opts.seconds || 30;
-    const p = JSON.parse(JSON.stringify(params));
+    const s = JSON.parse(JSON.stringify(settings));
+    Object.assign(s.overrides, opts.set);
+    const e = new Engine(s);
+    const S = e.synth;
+    const C = e.composer;
+    const p = e.track;
     if (opts.only) for (const k in p.layers) p.layers[k].on = p.layers[k].on && opts.only.includes(k);
     const oc = new OfflineAudioContext(2, SR * seconds, SR);
-    const e = new Engine(p);
-    e.init(oc);
-    e.gate.gain.value = 1;
+    S.init(oc);
+    S.gate.gain.value = 1;
     e.forceMain = !opts.intro;
 
     const notes = [];
@@ -190,23 +194,23 @@
     let now = 0;
     let inLead = false;
     const hook = (name, log) => {
-      const orig = e[name].bind(e);
-      e[name] = (...a) => {
+      const orig = S[name].bind(S);
+      S[name] = (...a) => {
         log(...a);
         return orig(...a);
       };
     };
-    const chordMidis = e.chordMidis.bind(e);
-    e.chordMidis = (deg) => {
-      const m = chordMidis(deg);
+    const chordMidis = C.chordMidis.bind(C);
+    C.chordMidis = (ch) => {
+      const m = chordMidis(ch);
       chords.push({ t: now, pcs: [...new Set(m.map((x) => ((x % 12) + 12) % 12))] });
       return m;
     };
     hook('bass', (t, midi, dur) => notes.push({ layer: 'bass', t, midi, dur }));
     hook('arpNote', (t, midi) => notes.push({ layer: 'arp', t, midi, dur: 0.3 }));
     hook('bell', (t, midi) => inLead || notes.push({ layer: 'bells', t, midi, dur: 0.8 }));
-    const lead = e.lead.bind(e);
-    e.lead = (t, midi, dur, vel) => {
+    const lead = S.lead.bind(S);
+    S.lead = (t, midi, dur, vel) => {
       notes.push({ layer: 'lead', t, midi, dur });
       inLead = true;
       lead(t, midi, dur, vel);
@@ -215,7 +219,7 @@
 
     const sections = [];
     let sec = null;
-    for (let i = 0, t = 0.05; t < seconds; i++, t += 60 / p.bpm / e.beat()) {
+    for (let i = 0, t = 0.05; t < seconds; i++, t += 60 / p.bpm / C.beat()) {
       now = t;
       e.scheduleStep(i, now);
       if (e.sec !== sec) {
@@ -230,13 +234,21 @@
     const r = buf.getChannelData(1);
     const mono = new Float32Array(l.length);
     for (let i = 0; i < l.length; i++) mono[i] = (l[i] + r[i]) / 2;
+    // ширина стерео: отношение «боковой» энергии (L−R) к «средней» (L+R); 0 — чистое моно
+    let mid = 0;
+    let side = 0;
+    for (let i = 0; i < l.length; i++) {
+      mid += (l[i] + r[i]) ** 2;
+      side += (l[i] - r[i]) ** 2;
+    }
 
     const scalePcs = SCALES[p.scale].map((x) => (x + p.root) % 12);
     return {
-      setup: `${p.theme}/${p.mood} ${p.meter} ${p.bpm}bpm ${p.scale}`,
+      setup: `${p.theme}/${p.mood} ${p.style || '-'} ${p.meter} ${p.bpm}bpm ${p.scale}`,
       layers: Object.keys(p.layers).filter((k) => p.layers[k].on).join(','),
       sections,
       renderMs,
+      stereoWidth: +Math.sqrt(side / (mid || 1)).toFixed(2),
       signal: signalStats(mono, scalePcs),
       harmony: harmonyStats(notes, chords),
       melody: melodyStats(notes, seconds),
